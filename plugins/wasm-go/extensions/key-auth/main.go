@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package main
 
 import (
@@ -123,6 +122,8 @@ func parseGlobalConfig(json gjson.Result, global *KeyAuthConfig, log wrapper.Log
 			Credential: credential.String(),
 		}
 		global.consumers = append(global.consumers, consumer)
+		global.credential2Name[consumer.Credential] = consumer.Name
+
 	}
 
 	return nil
@@ -186,14 +187,14 @@ func onHttpRequestHeaders(ctx wrapper.HttpContext, config KeyAuthConfig, log wra
 		// 匹配keys中的 keyname
 		for _, key := range config.Keys {
 			value, err := proxywasm.GetHttpRequestHeader(key)
-			if err != nil && value != "" {
+			if err == nil && value != "" {
 				tokens = append(tokens, value)
 			}
 		}
 	} else if config.InQuery {
 		for _, key := range config.Keys {
 			value, err := proxywasm.GetHttpRequestTrailer(key)
-			if err != nil && value != "" {
+			if err == nil && value != "" {
 				tokens = append(tokens, value)
 			}
 		}
