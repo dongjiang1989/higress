@@ -122,10 +122,8 @@ func parseGlobalConfig(json gjson.Result, global *KeyAuthConfig, log wrapper.Log
 			Credential: credential.String(),
 		}
 		global.consumers = append(global.consumers, consumer)
-		global.credential2Name[consumer.Credential] = consumer.Name
-
+		global.credential2Name[credential.String()] = name.String()
 	}
-
 	return nil
 }
 
