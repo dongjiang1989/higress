@@ -16,6 +16,7 @@ package main
 
 import (
 	"errors"
+	"net/url"
 
 	"github.com/alibaba/higress/plugins/wasm-go/pkg/wrapper"
 	"github.com/tetratelabs/proxy-wasm-go-sdk/proxywasm"
@@ -190,10 +191,13 @@ func onHttpRequestHeaders(ctx wrapper.HttpContext, config KeyAuthConfig, log wra
 			}
 		}
 	} else if config.InQuery {
+		requestUrl, _ := proxywasm.GetHttpRequestHeader(":path")
+		url, _ := url.Parse(requestUrl)
+		queryValues := url.Query()
 		for _, key := range config.Keys {
-			value, err := proxywasm.GetHttpRequestTrailer(key)
-			if err == nil && value != "" {
-				tokens = append(tokens, value)
+			values, ok := queryValues[key]
+			if ok && len(values) > 0 {
+				tokens = append(tokens, values...)
 			}
 		}
 	}
