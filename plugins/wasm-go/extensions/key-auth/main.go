@@ -266,12 +266,6 @@ func deniedNoKeyAuthData() types.Action {
 	return types.ActionContinue
 }
 
-func deniedInvalidCredentials() types.Action {
-	_ = proxywasm.SendHttpResponse(401, WWWAuthenticateHeader(protectionSpace),
-		[]byte("Request denied by Key Auth check. Invalid username and/or password."), -1)
-	return types.ActionContinue
-}
-
 func deniedUnauthorizedConsumer() types.Action {
 	_ = proxywasm.SendHttpResponse(403, WWWAuthenticateHeader(protectionSpace),
 		[]byte("Request denied by Key Auth check. Unauthorized consumer."), -1)
