@@ -55,11 +55,6 @@ type KeyAuthConfig struct {
 	credential2Name map[string]string `yaml:"-"`
 }
 
-type Response struct {
-	Message    string `json:"message"`
-	StatusCode int    `json:"code"`
-}
-
 func parseGlobalConfig(json gjson.Result, global *KeyAuthConfig, log wrapper.Log) error {
 	log.Debug("global config")
 
