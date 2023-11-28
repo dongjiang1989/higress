@@ -16,6 +16,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 
 	"github.com/alibaba/higress/plugins/wasm-go/pkg/wrapper"
@@ -25,7 +26,9 @@ import (
 )
 
 var (
-	ruleSet bool // 插件是否至少在一个 domain 或 route 上生效
+	ruleSet         bool            // 插件是否至少在一个 domain 或 route 上生效
+	protectionSpace = "MSE Gateway" // 认证失败时，返回响应头 WWW-Authenticate: Key realm=MSE Gateway
+
 )
 
 func main() {
@@ -250,25 +253,25 @@ func onHttpRequestHeaders(ctx wrapper.HttpContext, config KeyAuthConfig, log wra
 }
 
 func deniedMutiKeyAuthData() types.Action {
-	_ = proxywasm.SendHttpResponse(401, nil,
+	_ = proxywasm.SendHttpResponse(401, WWWAuthenticateHeader(protectionSpace),
 		[]byte("Request denied by Key Auth check. Muti Key Authentication information found."), -1)
 	return types.ActionContinue
 }
 
 func deniedNoKeyAuthData() types.Action {
-	_ = proxywasm.SendHttpResponse(401, nil,
+	_ = proxywasm.SendHttpResponse(401, WWWAuthenticateHeader(protectionSpace),
 		[]byte("Request denied by Key Auth check. No Key Authentication information found."), -1)
 	return types.ActionContinue
 }
 
 func deniedInvalidCredentials() types.Action {
-	_ = proxywasm.SendHttpResponse(401, nil,
+	_ = proxywasm.SendHttpResponse(401, WWWAuthenticateHeader(protectionSpace),
 		[]byte("Request denied by Key Auth check. Invalid username and/or password."), -1)
 	return types.ActionContinue
 }
 
 func deniedUnauthorizedConsumer() types.Action {
-	_ = proxywasm.SendHttpResponse(403, nil,
+	_ = proxywasm.SendHttpResponse(403, WWWAuthenticateHeader(protectionSpace),
 		[]byte("Request denied by Key Auth check. Unauthorized consumer."), -1)
 	return types.ActionContinue
 }
@@ -285,4 +288,10 @@ func contains(arr []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func WWWAuthenticateHeader(realm string) [][2]string {
+	return [][2]string{
+		{"WWW-Authenticate", fmt.Sprintf("Key realm=%s", realm)},
+	}
 }
