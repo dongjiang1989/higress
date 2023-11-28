@@ -63,8 +63,10 @@ type Response struct {
 func parseGlobalConfig(json gjson.Result, global *KeyAuthConfig, log wrapper.Log) error {
 	log.Debug("global config")
 
+	// init
 	ruleSet = false
 	global.credential2Name = make(map[string]string)
+
 	// global_auth
 	globalAuth := json.Get("global_auth")
 	if globalAuth.Exists() {
@@ -92,10 +94,10 @@ func parseGlobalConfig(json gjson.Result, global *KeyAuthConfig, log wrapper.Log
 		return errors.New("must one of in_query/in_header required")
 	}
 
-	if in_query.Exists() && in_query.IsBool() {
+	if in_query.Exists() {
 		global.InQuery = in_query.Bool()
 	}
-	if in_header.Exists() && in_query.IsBool() {
+	if in_header.Exists() {
 		global.InHeader = in_header.Bool()
 	}
 
